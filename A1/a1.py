@@ -1,62 +1,24 @@
-# import socket
-# import sys
-
-# uri = input()
-# HOST = uri
-# PORT = 80
-
-# print('HOST:', HOST)
-
-# try:
-#     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)        
-# except socket.error:
-#     print("failed to create socket")
-#     sys.exit()
-
-# try:
-#     ip = socket.gethostbyname(HOST)
-# except socket.error:
-#     print('failed to get ip')
-#     sys.exit()
-
-# try:
-#     s.connect((ip, PORT))
-#     response = s.recv(4096)
-#     print(response)
-#     s.close()
-# except:
-#     print('failed')
-#     sys.exit()
-
-
 import socket
-import sys  
+import sys
 
-host = 'www.pythonprogramminglanguage.com'
-port = 80  # web
+'''
+NOTE:
+http 2.0: set_alpn_protocols(), ssl
+s =  ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1_3)
 
-# create socket
-print('# Creating socket')
-try:
+password protected: 401 http response
+'''
+
+PORT = 80
+
+def main(uri):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-except socket.error:
-    print('Failed to create socket')
-    sys.exit()
+    s.connect((uri, PORT))
+    request = "GET /index.html HTTP/1.0\n\n"
+    s.send(request.encode())
+    data = s.recv(10000)
+    print(data.decode())
+    s.close()
 
-print('# Getting remote IP address') 
-try:
-    remote_ip = socket.gethostbyname( host )
-except socket.gaierror:
-    print('Hostname could not be resolved. Exiting')
-    sys.exit()
-
-# Connect to remote server
-print('# Connecting to server, ' + host + ' (' + remote_ip + ')')
-s.connect((remote_ip , port))
-
-
-# Receive data
-print('# Receive data from server')
-reply = s.recv(4096)
-
-print(reply )
+if __name__ == "__main__":
+    main(sys.argv[1])
