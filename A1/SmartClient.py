@@ -45,7 +45,7 @@ def connection(location):
     response = connect_http(location, '/')
     for i in range(5):
         status = get_status(response)
-        print("STATUS:", status)
+        # print("STATUS:", status)
         if status != 301 and status != 302:
             return response
 
@@ -55,19 +55,26 @@ def connection(location):
             response = connect_https(new_location, path)
         else:
             response = connect_http(new_location, path)
+    sys.exit("Error: many redirections")
 
+def to_cookie_string(cookie):
+    s = f"cookie name: {cookie['name'].group().strip()}"
+    if cookie['expires']:
+        s += f", expires time: {cookie['expires'].group().strip()}"
+    if cookie['domain']:
+        s += f", domain name: {cookie['domain'].group().strip()}"
+    return s
 
-def get_cookies(host):
-    return connection(host)
+def get_cookies(response):
+    cookie_lines = filter(lambda line: line.startswith('Set-Cookie:'), response.split('\n'))
+    cookies = map(lambda cookie:
+                    {
+                        'name': re.search('(?<=Set-Cookie:)([^=]*)(?=\=)', cookie),
+                        'expires': re.search('(?<=expires=)([^;]*)', cookie),
+                        'domain': re.search('(?<=domain=)([^;]*)', cookie)
+                    }, cookie_lines)
+    return map(lambda cookie: to_cookie_string(cookie), cookies)
 
-# def test(host):
-#     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-#         sock.connect((host, 80))
-#         request = f"GET / HTTP/1.1\nHost:{host}\nConnection: close\n\n"
-#         print(request)
-#         sock.sendall(request.encode())
-#         response = sock.recv(10000).decode()
-#         return response
 
 # def test2(host):
 #     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -80,7 +87,6 @@ def get_cookies(host):
 #     response = s.recv(10000).decode()
 #     return response
 
-
 def main():
     if len(sys.argv) != 2:
         sys.exit("Error: expected 1 argument")
@@ -92,14 +98,11 @@ def main():
     print("1. Supports http2:", 'yes' if is_http2_supported(url) else 'no')
 
     # cookies
+    response = connection(url)
     print("2. List of Cookies:")
-    # cookies = get_cookies(url)
-    response = get_cookies(url)
-    # connect_https('www.uvic.ca', '/')
-    # response = test2("www.uvic.ca")
-    print(response)
+    cookies = get_cookies(response)
+    for cookie in cookies: print(cookie)
     
-
     # password-protected
     print("3. Password-protected:", 'yes' if get_status(response) == 401 else 'no')
 
