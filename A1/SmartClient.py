@@ -55,7 +55,7 @@ def connection(location):
             response = connect_https(new_location, path)
         else:
             response = connect_http(new_location, path)
-    sys.exit("Error: many redirections")
+    sys.exit("Error: too many redirections")
 
 def to_cookie_string(cookie):
     s = f"cookie name: {cookie['name'].group().strip()}"
@@ -69,23 +69,11 @@ def get_cookies(response):
     cookie_lines = filter(lambda line: line.startswith('Set-Cookie:'), response.split('\n'))
     cookies = map(lambda cookie:
                     {
-                        'name': re.search('(?<=Set-Cookie:)([^=]*)(?=\=)', cookie),
-                        'expires': re.search('(?<=expires=)([^;]*)', cookie),
-                        'domain': re.search('(?<=domain=)([^;]*)', cookie)
+                        'name': re.search(r'(?<=Set-Cookie:)([^=]*)(?=\=)', cookie, re.IGNORECASE),
+                        'expires': re.search(r'(?<=expires=)([^;]*)', cookie, re.IGNORECASE),
+                        'domain': re.search(r'(?<=domain=)([^;]*)', cookie, re.IGNORECASE)
                     }, cookie_lines)
     return map(lambda cookie: to_cookie_string(cookie), cookies)
-
-
-# def test2(host):
-#     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     s.connect((host, 443))
-#     # s = ssl.wrap_socket(s, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
-#     s = ssl.wrap_socket(s)
-#     request = f"GET / HTTP/1.1\nHost:{host}\nConnection: close\n\n"
-#     print(request)
-#     s.sendall(request.encode())
-#     response = s.recv(10000).decode()
-#     return response
 
 def main():
     if len(sys.argv) != 2:
@@ -105,6 +93,8 @@ def main():
     
     # password-protected
     print("3. Password-protected:", 'yes' if get_status(response) == 401 else 'no')
+
+    # print(response)
 
 if __name__ == "__main__":
     main()
