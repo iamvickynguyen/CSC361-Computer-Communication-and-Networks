@@ -4,15 +4,16 @@ import ssl
 import re
 from urllib.parse import urlparse
 
-#https://python-hyper.org/projects/h2/en/stable/negotiating-http2.html
-
 def is_http2_supported(url):
-    context = ssl.create_default_context()
-    context.set_alpn_protocols(['h2', 'spdy/3', 'http/1.1'])
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        with context.wrap_socket(sock, server_hostname=url) as ssock:
-            ssock.connect((url, 443))
-            return ssock.selected_alpn_protocol() == "h2"
+    try:
+        context = ssl.create_default_context()
+        context.set_alpn_protocols(['h2', 'spdy/3', 'http/1.1'])
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            with context.wrap_socket(sock, server_hostname=url) as ssock:
+                ssock.connect((url, 443))
+                return ssock.selected_alpn_protocol() == "h2"
+    except socket.error as err:
+        sys.exit("Error: cannot connect - %s" %err)
 
 def get_status(response):
     return int(re.search(r'(HTTP/1.[01]\s*)(\d+)', response).group(2))
@@ -25,27 +26,32 @@ def get_location(response):
     return location, path, is_https
 
 def connect_http(host, path):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect((host, 80))
-        request = f"GET {path} HTTP/1.1\nHost:{host}\r\n\r\n"
-        sock.sendall(request.encode())
-        response = sock.recv(10000).decode()
-        return response
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((host, 80))
+            request = f"GET {path} HTTP/1.1\r\nHost:{host}\r\n\r\n"
+            sock.sendall(request.encode())
+            response = sock.recv(10000).decode()
+            return response
+    except socket.error as err:
+        sys.exit("Error: cannot connect - %s" %err)
 
 def connect_https(host, path):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect((host, 443))
-        sock = ssl.wrap_socket(sock)
-        request = f"GET {path} HTTP/1.1\nHost:{host}\r\n\r\n"
-        sock.sendall(request.encode())
-        response = sock.recv(10000).decode() 
-        return response
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((host, 443))
+            sock = ssl.wrap_socket(sock)
+            request = f"GET {path} HTTP/1.1\r\nHost:{host}\r\n\r\n"
+            sock.sendall(request.encode())
+            response = sock.recv(10000).decode() 
+            return response
+    except socket.error as err:
+        sys.exit("Error: cannot connect - %s" %err)
 
 def connection(location):
     response = connect_http(location, '/')
-    for i in range(5):
+    for i in range(100):
         status = get_status(response)
-        # print("STATUS:", status)
         if status != 301 and status != 302:
             return response
 
@@ -79,6 +85,8 @@ def main():
     if len(sys.argv) != 2:
         sys.exit("Error: expected 1 argument")
 
+    socket.setdefaulttimeout(5)
+
     url = sys.argv[1]
     print("website:", url)
 
@@ -93,8 +101,6 @@ def main():
     
     # password-protected
     print("3. Password-protected:", 'yes' if get_status(response) == 401 else 'no')
-
-    # print(response)
 
 if __name__ == "__main__":
     main()
