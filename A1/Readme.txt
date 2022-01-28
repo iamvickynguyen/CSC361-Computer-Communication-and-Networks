@@ -1,6 +1,8 @@
 How to run:
     python3 SmartClient.py <url>
 
+    Note: <url> input must not contain scheme
+
     Example: python3 SmartClient.py www.uvic.ca
     Output:
         website: www.uvic.ca
@@ -11,6 +13,4 @@ How to run:
         cookie name: www_def
         cookie name: TS0168706e, domain name: .www.uvic.ca
         3. Password-protected: no
-
-How it works:
-    
+        
