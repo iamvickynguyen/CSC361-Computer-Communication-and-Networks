@@ -38,11 +38,22 @@ def get_location(response, host, is_https):
     location = re.search(r'(Location:\s*)([^\r\n]*)', response).group(2)
     return parse_location(location, host, is_https)
 
+def print_request(request):
+    print("---Request begin---")
+    print(request)
+    print("---Request end---")
+
+def print_response(response):
+    print("---Response begin---")
+    print(response)
+    print("---Response end---")  
+
 def connect_http(host, path):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((host, 80))
             request = f"GET {path} HTTP/1.1\r\nHost:{host}\r\n\r\n"
+            print_request(request)
             sock.sendall(request.encode())
             response = sock.recv(10000).decode()
             return response
@@ -55,7 +66,7 @@ def connect_https(host, path):
             sock.connect((host, 443))
             sock = ssl.wrap_socket(sock)
             request = f"GET {path} HTTP/1.1\r\nHost:{host}\r\n\r\n"
-            print(request) # DEBUG
+            print_request(request)
             sock.sendall(request.encode())
             response = sock.recv(10000).decode() 
             return response
@@ -67,13 +78,11 @@ def connection(host, path):
     is_https = False
     for i in range(100):
         status = get_status(response)
-        print(response)
+        print_response(response)
         if status != 301 and status != 302:
             return response
 
         host, path, is_https = get_location(response, host, is_https)
-
-        # print(response)
 
         if is_https:
             response = connect_https(host, path)
@@ -106,15 +115,15 @@ def main():
     socket.setdefaulttimeout(5)
 
     url = sys.argv[1]
-    print("website:", url)
-
     host, path, is_https = parse_location(url)
+    response = connection(host, path)
+
+    print("website:", url)
 
     # is http2 supported
     print("1. Supports http2:", 'yes' if is_http2_supported(host) else 'no')
 
     # cookies
-    response = connection(host, path)
     print("2. List of Cookies:")
     cookies = get_cookies(response)
     for cookie in cookies: print(cookie)

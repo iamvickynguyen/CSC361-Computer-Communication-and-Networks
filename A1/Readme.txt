@@ -1,8 +1,6 @@
 How to run:
     python3 SmartClient.py <url>
 
-    Note: <url> input must not contain scheme
-
     Example: python3 SmartClient.py www.uvic.ca
     Output:
         website: www.uvic.ca
