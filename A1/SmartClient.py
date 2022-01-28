@@ -48,8 +48,8 @@ def connect_https(host, path):
     except socket.error as err:
         sys.exit("Error: cannot connect - %s" %err)
 
-def connection(location):
-    response = connect_http(location, '/')
+def connection(location, path):
+    response = connect_http(location, path)
     for i in range(100):
         status = get_status(response)
         if status != 301 and status != 302:
@@ -90,11 +90,16 @@ def main():
     url = sys.argv[1]
     print("website:", url)
 
+    host = re.search(r'^[^/]*', url).group()
+    path = re.search(r'\/[^\r\n]*', url)
+    if path: path = path.group()
+    else: path = '/'
+
     # is http2 supported
-    print("1. Supports http2:", 'yes' if is_http2_supported(url) else 'no')
+    print("1. Supports http2:", 'yes' if is_http2_supported(host) else 'no')
 
     # cookies
-    response = connection(url)
+    response = connection(host, path)
     print("2. List of Cookies:")
     cookies = get_cookies(response)
     for cookie in cookies: print(cookie)
