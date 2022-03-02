@@ -41,6 +41,9 @@ class IP_Header:
         num4 = (buffer[1]&15)
         length = num1+num2+num3+num4
         self.total_len_set(length)
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
  
 class TCP_Header:
     src_port = 0
@@ -150,6 +153,10 @@ class TCP_Header:
         if(self.ack_num>=orig_num):
             relative_ack = self.ack_num-orig_num+1
             self.ack_num_set(relative_ack)
+
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
    
 
 class packet():
@@ -174,11 +181,15 @@ class packet():
         self.RTT_flag = False
         self.buffer = None
         
-    def timestamp_set(self,buffer1,buffer2,orig_time):
-        seconds = struct.unpack('I',buffer1)[0]
-        microseconds = struct.unpack('<I',buffer2)[0]
-        self.timestamp = round(seconds+microseconds*0.000001-orig_time,6)
+    # def timestamp_set(self,buffer1,buffer2,orig_time):
+    #     seconds = struct.unpack('I',buffer1)[0]
+    #     microseconds = struct.unpack('<I',buffer2)[0]
+    #     self.timestamp = round(seconds+microseconds*0.000001-orig_time,6)
         #print(self.timestamp,self.packet_No)
+
+    def timestamp_set(self,seconds, microseconds, orig_time):
+        self.timestamp = round(seconds+microseconds*0.000001-orig_time,6)
+
     def packet_No_set(self,number):
         self.packet_No = number
         #print(self.packet_No)

@@ -32,7 +32,7 @@ class Packet_Header:
         return str(self.__class__) + ": " + str(self.__dict__)
 
 
-def parse_pkt_data(data):
+def parse_pkt_data(data, number: int, p_header: Packet_Header) -> packet:
     protocol = data[14 + 9]
     if protocol != 6: return None
 
@@ -55,4 +55,6 @@ def parse_pkt_data(data):
     pkt = packet()
     pkt.set_ip_header(ip_header)
     pkt.set_tcp_header(tcp_header)
+    pkt.packet_No_set(number)
+    pkt.timestamp_set(p_header.ts_sec, p_header.ts_usec, 0)
     return pkt
