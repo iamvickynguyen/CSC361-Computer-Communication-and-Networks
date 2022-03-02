@@ -14,8 +14,11 @@ def collect_connections_info(packets):
                     "pkt_dest_src_count": 0,
                     "start_time": p.timestamp - offset,
                     "end_time": p.timestamp - offset,
-                    "bytes_src_dest_count": 0, # TODO
-                    "bytes_dest_src_count": 0 # TODO
+                    "bytes_src_dest_count": p.get_bytes(), # TODO
+                    "bytes_dest_src_count": 0, # TODO
+                    "syn": p.get_flags()["SYN"],
+                    "fin": p.get_flags()["FIN"],
+                    "rst": p.get_flags()["RST"]
                 }
             else:
                 updated_info = {
@@ -24,7 +27,10 @@ def collect_connections_info(packets):
                     "start_time": connections[backward]["start_time"],
                     "end_time": p.timestamp - offset,
                     "bytes_src_dest_count": connections[backward]["bytes_src_dest_count"], # TODO
-                    "bytes_dest_src_count": connections[backward]["bytes_dest_src_count"] # TODO
+                    "bytes_dest_src_count": connections[backward]["bytes_dest_src_count"] + p.get_bytes(), # TODO
+                    "syn": connections[backward]["syn"] + p.get_flags()["SYN"],
+                    "fin": connections[backward]["fin"] + p.get_flags()["FIN"],
+                    "rst": connections[backward]["rst"] + p.get_flags()["RST"]
                 }
                 connections[backward] = updated_info
         else:
@@ -33,8 +39,11 @@ def collect_connections_info(packets):
                 "pkt_dest_src_count": connections[forward]["pkt_dest_src_count"],
                 "start_time": connections[forward]["start_time"],
                 "end_time": p.timestamp - offset,
-                "bytes_src_dest_count": connections[forward]["bytes_src_dest_count"], # TODO
-                "bytes_dest_src_count": connections[forward]["bytes_dest_src_count"] # TODO
+                "bytes_src_dest_count": connections[forward]["bytes_src_dest_count"] + p.get_bytes(), # TODO
+                "bytes_dest_src_count": connections[forward]["bytes_dest_src_count"], # TODO
+                "syn": connections[forward]["syn"] + p.get_flags()["SYN"],
+                "fin": connections[forward]["fin"] + p.get_flags()["FIN"],
+                "rst": connections[forward]["rst"] + p.get_flags()["RST"]
             }
             connections[forward] = updated_info
 
@@ -56,7 +65,7 @@ def output_report(packets):
         print(f'Destination Address: {k[2]}')
         print(f'Source Port: {k[1]}')
         print(f'Destination Port: {k[3]}')
-        print(f'Status: TODO')
+        print(f'Status: S{v["syn"]}F{v["fin"]}{"/R" if v["rst"] > 0 else ""}')
         print(f'Start time: {round_time(v["start_time"])} seconds')
         print(f'End Time: {round_time(v["end_time"])} seconds')
         print(f'Duration: {round_time(v["end_time"] - v["start_time"])} seconds')

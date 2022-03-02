@@ -122,7 +122,7 @@ class TCP_Header:
         self.ack_num_set(ack)
         return None
     
-    def get_flags(self,buffer):
+    def set_flags(self,buffer):
         value = struct.unpack("B",buffer)[0]
         fin = value & 1
         syn = (value & 2)>>1
@@ -130,6 +130,10 @@ class TCP_Header:
         ack = (value & 16)>>4
         self.flags_set(ack, rst, syn, fin)
         return None
+
+    def get_flags(self):
+        return self.flags
+
     def get_window_size(self,buffer1,buffer2):
         buffer = buffer2+buffer1
         size = struct.unpack('H',buffer)[0]
@@ -192,20 +196,22 @@ class packet():
 
     def packet_No_set(self,number):
         self.packet_No = number
-        #print(self.packet_No)
         
     def get_RTT_value(self,p):
         rtt = p.timestamp-self.timestamp
         self.RTT_value = round(rtt,8)
 
     def get_flags(self):
-        return self.TCP_header.flags
+        return self.TCP_header.get_flags()
 
     def set_ip_header(self, ip_header):
         self.IP_header = ip_header
 
     def set_tcp_header(self, tcp_header):
         self.TCP_header = tcp_header
+
+    def get_bytes(self):
+        return self.IP_header.total_len
 
     def __str__(self):
         return str(self.__class__) + ": <IP HEADER>" + str(self.IP_header.__dict__) + ": <TCP HEADER>" + str(self.TCP_header.__dict__)

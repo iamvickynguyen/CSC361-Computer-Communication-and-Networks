@@ -49,7 +49,7 @@ def parse_pkt_data(data, number: int, p_header: Packet_Header) -> packet:
     tcp_header.get_seq_num(tcp_header_bytes[4:8])
     tcp_header.get_ack_num(tcp_header_bytes[8:12])
     tcp_header.get_data_offset(tcp_header_bytes[12:13])
-    tcp_header.get_flags(tcp_header_bytes[13:14])
+    tcp_header.set_flags(tcp_header_bytes[13:14])
     tcp_header.get_window_size(tcp_header_bytes[14:15], tcp_header_bytes[15:16])
 
     pkt = packet()
