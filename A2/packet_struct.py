@@ -186,3 +186,15 @@ class packet():
     def get_RTT_value(self,p):
         rtt = p.timestamp-self.timestamp
         self.RTT_value = round(rtt,8)
+
+    def get_flags(self):
+        return self.TCP_header.flags
+
+    def set_ip_header(self, ip_header):
+        self.IP_header = ip_header
+
+    def set_tcp_header(self, tcp_header):
+        self.TCP_header = tcp_header
+
+    def __str__(self):
+        return str(self.__class__) + ": <IP HEADER>" + str(self.IP_header.__dict__) + ": <TCP HEADER>" + str(self.TCP_header.__dict__)
