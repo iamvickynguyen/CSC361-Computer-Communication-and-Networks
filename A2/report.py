@@ -52,6 +52,15 @@ def collect_connections_info(packets):
 def round_time(timestamp):
     return round(timestamp, 6)
 
+def count_complete_connections(connections):
+    return sum(map(lambda x: 1, filter(lambda conn: conn['syn'] > 0 and conn['fin'] > 0, connections)))
+
+def count_reset_connections(connections):
+    return sum(map(lambda conn: min(1, conn['rst']), connections))
+
+def count_not_ended_connections(connections):
+    return sum(map(lambda conn: min(1, conn['syn']) - min(1, conn['fin']), connections))
+
 def output_report(packets):
     connections = collect_connections_info(packets)
     print("A) Total number of connections:", len(connections))
@@ -80,3 +89,26 @@ def output_report(packets):
     print()
     print("-----------------------------")
 
+    print("C) General")
+    print(f'Total number of complete TCP connections: {count_complete_connections(connections.values())}')
+    print(f'Number of reset TCP connections: {count_reset_connections(connections.values())}')
+    print(f'Number of TCP connections that were still open when the trace capture ended: {count_not_ended_connections(connections.values())}')
+
+    print()
+    print("-----------------------------")
+    print("D) Complete TCP connections")
+    print("Minimum time duration: TODO")
+    print("Mean time duration: TODO")
+    print("Maximum time duration: TODO")
+    print()
+    print("Minimum RTT value: TODO")
+    print("Mean RTT value: TODO seconds")
+    print("Maximum RTT value: TODO seconds")
+    print()
+    print("Minimum number of packets including both send/received: TODO")
+    print("Mean number of packets including both send/received: TODO")
+    print("Maximum number of packets including both send/received: TODO")
+    print()
+    print("Minimum receive window size including both send/received: TODO bytes")
+    print("Mean receive window size including both send/received: TODO bytes")
+    print("Maximum receive window size including both send/received: TODO bytes")
