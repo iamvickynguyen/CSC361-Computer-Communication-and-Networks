@@ -1,3 +1,6 @@
+def round_time(timestamp):
+    return round(timestamp, 6)
+    
 def collect_connections_info(packets):
     if not packets: return {}
 
@@ -14,8 +17,8 @@ def collect_connections_info(packets):
                     "pkt_dest_src_count": 0,
                     "start_time": p.timestamp - offset,
                     "end_time": p.timestamp - offset,
-                    "bytes_src_dest_count": p.get_data_bytes(), # TODO
-                    "bytes_dest_src_count": 0, # TODO
+                    "bytes_src_dest_count": p.get_data_bytes(),
+                    "bytes_dest_src_count": 0,
                     "syn": p.get_flags()["SYN"],
                     "fin": p.get_flags()["FIN"],
                     "rst": p.get_flags()["RST"]
@@ -25,9 +28,9 @@ def collect_connections_info(packets):
                     "pkt_src_dest_count": connections[backward]["pkt_src_dest_count"],
                     "pkt_dest_src_count": connections[backward]["pkt_dest_src_count"] + 1,
                     "start_time": connections[backward]["start_time"],
-                    "end_time": p.timestamp - offset,
+                    "end_time": connections[backward]["end_time"] if connections[backward]["fin"] == 1 else p.timestamp - offset,
                     "bytes_src_dest_count": connections[backward]["bytes_src_dest_count"], # TODO
-                    "bytes_dest_src_count": connections[backward]["bytes_dest_src_count"] + p.get_data_bytes(), # TODO
+                    "bytes_dest_src_count": connections[backward]["bytes_dest_src_count"] + p.get_data_bytes(),
                     "syn": connections[backward]["syn"] + p.get_flags()["SYN"],
                     "fin": connections[backward]["fin"] + p.get_flags()["FIN"],
                     "rst": connections[backward]["rst"] + p.get_flags()["RST"]
@@ -38,9 +41,9 @@ def collect_connections_info(packets):
                 "pkt_src_dest_count": connections[forward]["pkt_src_dest_count"] + 1,
                 "pkt_dest_src_count": connections[forward]["pkt_dest_src_count"],
                 "start_time": connections[forward]["start_time"],
-                "end_time": p.timestamp - offset,
-                "bytes_src_dest_count": connections[forward]["bytes_src_dest_count"] + p.get_data_bytes(), # TODO
-                "bytes_dest_src_count": connections[forward]["bytes_dest_src_count"], # TODO
+                "end_time": connections[forward]["end_time"] if connections[forward]["fin"] == 1 else p.timestamp - offset,
+                "bytes_src_dest_count": connections[forward]["bytes_src_dest_count"] + p.get_data_bytes(),
+                "bytes_dest_src_count": connections[forward]["bytes_dest_src_count"],
                 "syn": connections[forward]["syn"] + p.get_flags()["SYN"],
                 "fin": connections[forward]["fin"] + p.get_flags()["FIN"],
                 "rst": connections[forward]["rst"] + p.get_flags()["RST"]
@@ -49,17 +52,24 @@ def collect_connections_info(packets):
 
     return connections
 
-def round_time(timestamp):
-    return round(timestamp, 6)
-
-def count_complete_connections(connections):
-    return sum(map(lambda x: 1, filter(lambda conn: conn['syn'] > 0 and conn['fin'] > 0, connections)))
+def get_complete_connetions(connections):
+    return list(filter(lambda conn: conn['syn'] > 0 and conn['fin'] > 0, connections))
 
 def count_reset_connections(connections):
     return sum(map(lambda conn: min(1, conn['rst']), connections))
 
 def count_not_ended_connections(connections):
     return sum(map(lambda conn: min(1, conn['syn']) - min(1, conn['fin']), connections))
+
+def get_min_duration(connections):
+    return round_time(min(map(lambda conn: conn["end_time"] - conn["start_time"], connections)))
+
+def get_max_duration(connections):
+    return round_time(max(map(lambda conn: conn["end_time"] - conn["start_time"], connections)))
+
+def get_mean_duration(connections):
+    l = list(map(lambda conn: conn["end_time"] - conn["start_time"], connections))
+    return round_time(sum(l)/len(l))
 
 def output_report(packets):
     connections = collect_connections_info(packets)
@@ -89,17 +99,18 @@ def output_report(packets):
     print()
     print("-----------------------------")
 
+    complete_connections = get_complete_connetions(connections.values())
     print("C) General")
-    print(f'Total number of complete TCP connections: {count_complete_connections(connections.values())}')
+    print(f'Total number of complete TCP connections: {len(complete_connections)}')
     print(f'Number of reset TCP connections: {count_reset_connections(connections.values())}')
     print(f'Number of TCP connections that were still open when the trace capture ended: {count_not_ended_connections(connections.values())}')
 
     print()
     print("-----------------------------")
     print("D) Complete TCP connections")
-    print("Minimum time duration: TODO")
-    print("Mean time duration: TODO")
-    print("Maximum time duration: TODO")
+    print(f'Minimum time duration: {get_min_duration(complete_connections)} seconds') # FIXME
+    print(f'Mean time duration: {get_mean_duration(complete_connections)} seconds')
+    print(f'Maximum time duration: {get_max_duration(complete_connections)} seconds')
     print()
     print("Minimum RTT value: TODO")
     print("Mean RTT value: TODO seconds")
