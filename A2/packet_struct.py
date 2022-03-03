@@ -29,10 +29,13 @@ class IP_Header:
         d_ip = str(dst_addr[0])+'.'+str(dst_addr[1])+'.'+str(dst_addr[2])+'.'+str(dst_addr[3])
         self.ip_set(s_ip, d_ip)
         
-    def get_header_len(self,value):
+    def set_header_len(self,value):
         result = struct.unpack('B', value)[0]
         length = (result & 15)*4
         self.header_len_set(length)
+
+    def get_header_len(self):
+        return self.ip_header_len
 
     def get_total_len(self,buffer):
         num1 = ((buffer[0]&240)>>4)*16*16*16
@@ -210,8 +213,8 @@ class packet():
     def set_tcp_header(self, tcp_header):
         self.TCP_header = tcp_header
 
-    def get_bytes(self):
-        return self.IP_header.total_len
+    def get_data_bytes(self):
+        return self.IP_header.total_len - self.IP_header.get_header_len() - self.TCP_header.data_offset
 
     def __str__(self):
         return str(self.__class__) + ": <IP HEADER>" + str(self.IP_header.__dict__) + ": <TCP HEADER>" + str(self.TCP_header.__dict__)

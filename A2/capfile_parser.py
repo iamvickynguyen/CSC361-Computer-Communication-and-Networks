@@ -37,7 +37,7 @@ def parse_pkt_data(data, number: int, p_header: Packet_Header) -> packet:
     if protocol != 6: return None
 
     ip_header = IP_Header()
-    ip_header.get_header_len(data[14:15])
+    ip_header.set_header_len(data[14:15])
     ip_header_bytes = data[14:14 + ip_header.ip_header_len]
     ip_header.get_total_len(ip_header_bytes[2:4])
     ip_header.get_IP(ip_header_bytes[-8:-8+4], ip_header_bytes[-4:])
