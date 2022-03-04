@@ -1,3 +1,5 @@
+from collections import defaultdict, deque
+
 def round6(timestamp):
     return round(timestamp, 6)
     
@@ -22,7 +24,16 @@ def collect_connections_info(packets):
                     "syn": p.get_flags()["SYN"],
                     "fin": p.get_flags()["FIN"],
                     "rst": p.get_flags()["RST"],
-                    "win_size": [p.get_window_size()]
+                    "win_size": [p.get_window_size()],
+                    "packets": [
+                        {
+                            "seq_num": p.get_seq_number(),
+                            "ack_num": p.get_ack_number(),
+                            "data_bytes": p.get_data_bytes(),
+                            "timestamp": p.timestamp - offset,
+                            "is_client": True
+                        }
+                    ]
                 }
             else:
                 updated_info = {
@@ -35,7 +46,14 @@ def collect_connections_info(packets):
                     "syn": connections[backward]["syn"] + p.get_flags()["SYN"],
                     "fin": connections[backward]["fin"] + p.get_flags()["FIN"],
                     "rst": connections[backward]["rst"] + p.get_flags()["RST"],
-                    "win_size": connections[backward]["win_size"] + [p.get_window_size()]
+                    "win_size": connections[backward]["win_size"] + [p.get_window_size()],
+                    "packets": connections[backward]["packets"] + [{
+                            "seq_num": p.get_seq_number(),
+                            "ack_num": p.get_ack_number(),
+                            "data_bytes": p.get_data_bytes(),
+                            "timestamp": p.timestamp - offset,
+                            "is_client": False
+                        }]
                 }
                 connections[backward] = updated_info
         else:
@@ -49,7 +67,14 @@ def collect_connections_info(packets):
                 "syn": connections[forward]["syn"] + p.get_flags()["SYN"],
                 "fin": connections[forward]["fin"] + p.get_flags()["FIN"],
                 "rst": connections[forward]["rst"] + p.get_flags()["RST"],
-                "win_size": connections[forward]["win_size"] + [p.get_window_size()]
+                "win_size": connections[forward]["win_size"] + [p.get_window_size()],
+                "packets": connections[forward]["packets"] + [{
+                        "seq_num": p.get_seq_number(),
+                        "ack_num": p.get_ack_number(),
+                        "data_bytes": p.get_data_bytes(),
+                        "timestamp": p.timestamp - offset,
+                        "is_client": True
+                    }]
             }
             connections[forward] = updated_info
 
@@ -97,6 +122,20 @@ def get_mean_window_size(connections):
         total += s
     return round6(total/length)
 
+def get_list_RTT(connections):
+    rtt = []
+    conn_packets = map(lambda conn: conn["packets"], connections)
+    for packets in conn_packets:
+        lookup = defaultdict(deque)
+        for p in packets:
+            if p["is_client"]:
+                lookup[p["seq_num"] + p["data_bytes"]].append(p["timestamp"])
+            else:
+                if p["ack_num"] in lookup and len(lookup[p["ack_num"]]) > 0:
+                    rtt_time = p["timestamp"] - lookup[p["ack_num"]].popleft()
+                    rtt.append(rtt_time)
+    return rtt
+
 def output_report(packets):
     connections = collect_connections_info(packets)
     print("A) Total number of connections:", len(connections))
@@ -138,9 +177,12 @@ def output_report(packets):
     print(f'Mean time duration: {get_mean_duration(complete_connections)} seconds')
     print(f'Maximum time duration: {get_max_duration(complete_connections)} seconds')
     print()
-    print(f'Minimum RTT value: TODO')
+
+    rtt = get_list_RTT(complete_connections)
+    print(rtt)
+    print(f'Minimum RTT value: {round6(min(rtt))} seconds')
     print(f'Mean RTT value: TODO seconds')
-    print(f'Maximum RTT value: TODO seconds')
+    print(f'Maximum RTT value: {round6(max(rtt))} seconds')
     print()
     print(f'Minimum number of packets including both send/received: {get_min_packets(complete_connections)}')
     print(f'Mean number of packets including both send/received: {get_mean_packets(complete_connections)}')

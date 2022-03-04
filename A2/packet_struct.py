@@ -118,11 +118,13 @@ class TCP_Header:
         seq = struct.unpack(">I",buffer)[0]
         self.seq_num_set(seq)
         #print(seq)
+        print("seq: ", seq) # DEBUG
         return None
     
     def get_ack_num(self,buffer):
         ack = struct.unpack('>I',buffer)[0]
         self.ack_num_set(ack)
+        print("ack: ", ack) # DEBUG
         return None
     
     def set_flags(self,buffer):
@@ -150,16 +152,19 @@ class TCP_Header:
         #print(self.data_offset)
         return None
     
-    def relative_seq_num(self,orig_num):
-        if(self.seq_num>=orig_num):
-            relative_seq = self.seq_num - orig_num
-            self.seq_num_set(relative_seq)
-        #print(self.seq_num)
+    # def relative_seq_num(self,orig_num):
+    #     if(self.seq_num>=orig_num):
+    #         relative_seq = self.seq_num - orig_num
+    #         self.seq_num_set(relative_seq)
+    #     #print(self.seq_num)
         
-    def relative_ack_num(self,orig_num):
-        if(self.ack_num>=orig_num):
-            relative_ack = self.ack_num-orig_num+1
-            self.ack_num_set(relative_ack)
+    # def relative_ack_num(self,orig_num):
+    #     if(self.ack_num>=orig_num):
+    #         relative_ack = self.ack_num-orig_num+1
+    #         self.ack_num_set(relative_ack)
+
+    def return_ack_num(self):
+        return self.ack_num
 
 
     def __str__(self):
@@ -218,6 +223,12 @@ class packet():
 
     def get_window_size(self):
         return self.TCP_header.window_size
+
+    def get_seq_number(self):
+        return self.TCP_header.seq_num
+
+    def get_ack_number(self):
+        return self.TCP_header.return_ack_num()
 
     def __str__(self):
         return str(self.__class__) + ": <IP HEADER>" + str(self.IP_header.__dict__) + ": <TCP HEADER>" + str(self.TCP_header.__dict__)
