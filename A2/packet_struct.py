@@ -216,5 +216,8 @@ class packet():
     def get_data_bytes(self):
         return self.IP_header.total_len - self.IP_header.get_header_len() - self.TCP_header.data_offset
 
+    def get_window_size(self):
+        return self.TCP_header.window_size
+
     def __str__(self):
         return str(self.__class__) + ": <IP HEADER>" + str(self.IP_header.__dict__) + ": <TCP HEADER>" + str(self.TCP_header.__dict__)
