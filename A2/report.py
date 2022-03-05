@@ -1,8 +1,6 @@
 from collections import defaultdict, deque
-import json
 
-def round6(timestamp):
-    return round(timestamp, 6)
+DECIMALS = 6
     
 def collect_connections_info(packets):
     if not packets: return {}
@@ -99,77 +97,46 @@ def count_reset_connections(connections):
 def count_not_ended_connections(connections):
     return sum(map(lambda conn: min(1, conn['syn']) - min(1, conn['fin']), connections))
 
-def get_min_duration(connections):
-    return round6(min(map(lambda conn: conn["end_time"] - conn["start_time"], connections)))
-
-def get_max_duration(connections):
-    return round6(max(map(lambda conn: conn["end_time"] - conn["start_time"], connections)))
+def get_duration(connections, f):
+    return round(f(map(lambda conn: conn["end_time"] - conn["start_time"], connections)), DECIMALS)
 
 def get_mean_duration(connections):
-    return round6(sum(map(lambda conn: conn["end_time"] - conn["start_time"], connections))/len(connections))
+    return round(sum(map(lambda conn: conn["end_time"] - conn["start_time"], connections))/len(connections), DECIMALS)
 
-def get_min_packets(connections):
-    return min(map(lambda conn: conn["pkt_src_dest_count"] + conn["pkt_dest_src_count"], connections))
-
-def get_max_packets(connections):
-    return max(map(lambda conn: conn["pkt_src_dest_count"] + conn["pkt_dest_src_count"], connections))
+def get_packets(connections, f):
+    return f(map(lambda conn: conn["pkt_src_dest_count"] + conn["pkt_dest_src_count"], connections))
 
 def get_mean_packets(connections):
-    return round6(sum(map(lambda conn: conn["pkt_src_dest_count"] + conn["pkt_dest_src_count"], connections))/len(connections))
+    return round(sum(map(lambda conn: conn["pkt_src_dest_count"] + conn["pkt_dest_src_count"], connections))/len(connections), DECIMALS)
 
-def get_min_window_size(connections):
-    return min(map(lambda conn: min(conn["win_size"]), connections))
-
-def get_max_window_size(connections):
-    return max(map(lambda conn: max(conn["win_size"]), connections))
+def get_window_size(connections, f):
+    return f(map(lambda conn: f(conn["win_size"]), connections))
 
 def get_mean_window_size(connections):
     conns = map(lambda conn: (len(conn["win_size"]), sum(conn["win_size"])), connections)
-    length = 0
-    total = 0
+    length, total = 0, 0
     for l, s in conns:
         length += l
         total += s
-    return round6(total/length)
+    return round(total/length, DECIMALS)
 
 def get_list_RTT(connections):
     rtt = []
-    # for conn in connections:
-    #     lookup = defaultdict(deque)
-    #     rtt_tmp = []
-    #     for p in conn["packets"]:
-    #         if p["is_client"]:
-    #             if p["data_bytes"] == 0 and (p["syn"] > 0 or p["fin"] > 0): lookup[p["seq_num"] + p["data_bytes"] + 1].append(p["timestamp"])
-    #             else: lookup[p["seq_num"] + p["data_bytes"] + 1].append(p["timestamp"])
-    #         else:
-    #             if p["ack_num"] in lookup and len(lookup[p["ack_num"]]) > 0:
-    #                 rtt_time = p["timestamp"] - lookup[p["ack_num"]].popleft()
-    #                 rtt_tmp.append(rtt_time)
-            
-    #         if p["fin"] > 0:
-    #             rtt += rtt_tmp
-    #             rtt_tmp.clear()
-
-    with open('packets.json', 'w') as f:
-        json.dump(connections, f)
-
-    for i in range(10):
-        conn = connections[i]
+    for conn in connections:
         lookup = defaultdict(deque)
         rtt_tmp = []
         for p in conn["packets"]:
-            print("NO: ", p["packet_no"])
             if p["is_client"]:
-                if p["data_bytes"] == 0: lookup[p["seq_num"] + p["data_bytes"] + 1].append([p["timestamp"], p["packet_no"]])
-                else: lookup[p["seq_num"] + p["data_bytes"]].append([p["timestamp"], p["packet_no"]])
+                if p["data_bytes"] == 0 and (p["syn"] > 0 or p["fin"] > 0): lookup[p["seq_num"] + p["data_bytes"] + 1].append(p["timestamp"])
+                else: lookup[p["seq_num"] + p["data_bytes"] + 1].append(p["timestamp"])
             else:
                 if p["ack_num"] in lookup and len(lookup[p["ack_num"]]) > 0:
-                    print(f'client NO: {lookup[p["ack_num"]][0][1]}, server NO: {p["packet_no"]}')
-                    print(lookup[p["ack_num"]][0][0], p["timestamp"])
-                    rtt_time = p["timestamp"] - (lookup[p["ack_num"]].popleft())[0]
+                    rtt_time = p["timestamp"] - lookup[p["ack_num"]].popleft()
                     rtt_tmp.append(rtt_time)
-            
-        rtt += rtt_tmp
+
+            if p["fin"] > 0:
+                rtt += rtt_tmp
+                rtt_tmp.clear()
     return rtt
 
 def output_report(packets):
@@ -186,16 +153,17 @@ def output_report(packets):
         print(f'Source Port: {k[1]}')
         print(f'Destination Port: {k[3]}')
         print(f'Status: S{v["syn"]}F{v["fin"]}{"/R" if v["rst"] > 0 else ""}')
-        print(f'Start time: {round6(v["start_time"])} seconds')
-        print(f'End Time: {round6(v["end_time"])} seconds')
-        print(f'Duration: {round6(v["end_time"] - v["start_time"])} seconds')
-        print(f'Number of packets sent from Source to Destination: {v["pkt_src_dest_count"]}')
-        print(f'Number of packets sent from Destination to Source: {v["pkt_dest_src_count"]}')
-        print(f'Total number of packets: {v["pkt_src_dest_count"] + v["pkt_dest_src_count"]}')
-        print(f'Number of data bytes sent from Source to Destination: {v["bytes_src_dest_count"]}')
-        print(f'Number of data bytes sent from Destination to Source: {v["bytes_dest_src_count"]}')
-        print(f'Total number of data bytes: {v["bytes_src_dest_count"] + v["bytes_dest_src_count"]}')
-        print("END")
+        if v["fin"] > 0:
+            print(f'Start time: {round(v["start_time"], DECIMALS)} seconds')
+            print(f'End Time: {round(v["end_time"], DECIMALS)} seconds')
+            print(f'Duration: {round(v["end_time"] - v["start_time"], DECIMALS)} seconds')
+            print(f'Number of packets sent from Source to Destination: {v["pkt_src_dest_count"]}')
+            print(f'Number of packets sent from Destination to Source: {v["pkt_dest_src_count"]}')
+            print(f'Total number of packets: {v["pkt_src_dest_count"] + v["pkt_dest_src_count"]}')
+            print(f'Number of data bytes sent from Source to Destination: {v["bytes_src_dest_count"]}')
+            print(f'Number of data bytes sent from Destination to Source: {v["bytes_dest_src_count"]}')
+            print(f'Total number of data bytes: {v["bytes_src_dest_count"] + v["bytes_dest_src_count"]}')
+            print("END")
         print("++++++++++++++++++++++++++++++++")
     print()
     print("-----------------------------")
@@ -209,21 +177,20 @@ def output_report(packets):
     print()
     print("-----------------------------")
     print("D) Complete TCP connections")
-    print(f'Minimum time duration: {get_min_duration(complete_connections)} seconds')
+    print(f'Minimum time duration: {get_duration(complete_connections, min)} seconds')
     print(f'Mean time duration: {get_mean_duration(complete_connections)} seconds')
-    print(f'Maximum time duration: {get_max_duration(complete_connections)} seconds')
+    print(f'Maximum time duration: {get_duration(complete_connections, max)} seconds')
     print()
 
     rtt = get_list_RTT(complete_connections)
-    print(rtt)
-    print(f'Minimum RTT value: {round6(min(rtt))} seconds')
-    print(f'Mean RTT value: {round6(sum(rtt)/len(rtt))} seconds')
-    print(f'Maximum RTT value: {round6(max(rtt))} seconds')
+    print(f'Minimum RTT value: {round(min(rtt), DECIMALS)} seconds')
+    print(f'Mean RTT value: {round(sum(rtt)/len(rtt), DECIMALS)} seconds')
+    print(f'Maximum RTT value: {round(max(rtt), DECIMALS)} seconds')
     print()
-    print(f'Minimum number of packets including both send/received: {get_min_packets(complete_connections)}')
+    print(f'Minimum number of packets including both send/received: {get_packets(complete_connections, min)}')
     print(f'Mean number of packets including both send/received: {get_mean_packets(complete_connections)}')
-    print(f'Maximum number of packets including both send/received: {get_max_packets(complete_connections)}')
+    print(f'Maximum number of packets including both send/received: {get_packets(complete_connections, max)}')
     print()
-    print(f'Minimum receive window size including both send/received: {get_min_window_size(complete_connections)} bytes')
+    print(f'Minimum receive window size including both send/received: {get_window_size(complete_connections, min)} bytes')
     print(f'Mean receive window size including both send/received: {get_mean_window_size(complete_connections)} bytes')
-    print(f'Maximum receive window size including both send/received: {get_max_window_size(complete_connections)} bytes')
+    print(f'Maximum receive window size including both send/received: {get_window_size(complete_connections, max)} bytes')
