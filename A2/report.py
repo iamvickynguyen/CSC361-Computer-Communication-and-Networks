@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+import json
 
 def round6(timestamp):
     return round(timestamp, 6)
@@ -31,7 +32,10 @@ def collect_connections_info(packets):
                             "ack_num": p.get_ack_number(),
                             "data_bytes": p.get_data_bytes(),
                             "timestamp": p.timestamp - offset,
-                            "is_client": True
+                            "is_client": True,
+                            "fin": p.get_flags()["FIN"],
+                            "syn": p.get_flags()["SYN"],
+                            "packet_no": p.packet_No
                         }
                     ]
                 }
@@ -52,7 +56,10 @@ def collect_connections_info(packets):
                             "ack_num": p.get_ack_number(),
                             "data_bytes": p.get_data_bytes(),
                             "timestamp": p.timestamp - offset,
-                            "is_client": False
+                            "is_client": False,
+                            "fin": p.get_flags()["FIN"],
+                            "syn": p.get_flags()["SYN"],
+                            "packet_no": p.packet_No
                         }]
                 }
                 connections[backward] = updated_info
@@ -73,7 +80,10 @@ def collect_connections_info(packets):
                         "ack_num": p.get_ack_number(),
                         "data_bytes": p.get_data_bytes(),
                         "timestamp": p.timestamp - offset,
-                        "is_client": True
+                        "is_client": True,
+                        "fin": p.get_flags()["FIN"],
+                        "syn": p.get_flags()["SYN"],
+                        "packet_no": p.packet_No
                     }]
             }
             connections[forward] = updated_info
@@ -124,16 +134,42 @@ def get_mean_window_size(connections):
 
 def get_list_RTT(connections):
     rtt = []
-    conn_packets = map(lambda conn: conn["packets"], connections)
-    for packets in conn_packets:
+    # for conn in connections:
+    #     lookup = defaultdict(deque)
+    #     rtt_tmp = []
+    #     for p in conn["packets"]:
+    #         if p["is_client"]:
+    #             if p["data_bytes"] == 0 and (p["syn"] > 0 or p["fin"] > 0): lookup[p["seq_num"] + p["data_bytes"] + 1].append(p["timestamp"])
+    #             else: lookup[p["seq_num"] + p["data_bytes"] + 1].append(p["timestamp"])
+    #         else:
+    #             if p["ack_num"] in lookup and len(lookup[p["ack_num"]]) > 0:
+    #                 rtt_time = p["timestamp"] - lookup[p["ack_num"]].popleft()
+    #                 rtt_tmp.append(rtt_time)
+            
+    #         if p["fin"] > 0:
+    #             rtt += rtt_tmp
+    #             rtt_tmp.clear()
+
+    with open('packets.json', 'w') as f:
+        json.dump(connections, f)
+
+    for i in range(10):
+        conn = connections[i]
         lookup = defaultdict(deque)
-        for p in packets:
+        rtt_tmp = []
+        for p in conn["packets"]:
+            print("NO: ", p["packet_no"])
             if p["is_client"]:
-                lookup[p["seq_num"] + p["data_bytes"]].append(p["timestamp"])
+                if p["data_bytes"] == 0: lookup[p["seq_num"] + p["data_bytes"] + 1].append([p["timestamp"], p["packet_no"]])
+                else: lookup[p["seq_num"] + p["data_bytes"]].append([p["timestamp"], p["packet_no"]])
             else:
                 if p["ack_num"] in lookup and len(lookup[p["ack_num"]]) > 0:
-                    rtt_time = p["timestamp"] - lookup[p["ack_num"]].popleft()
-                    rtt.append(rtt_time)
+                    print(f'client NO: {lookup[p["ack_num"]][0][1]}, server NO: {p["packet_no"]}')
+                    print(lookup[p["ack_num"]][0][0], p["timestamp"])
+                    rtt_time = p["timestamp"] - (lookup[p["ack_num"]].popleft())[0]
+                    rtt_tmp.append(rtt_time)
+            
+        rtt += rtt_tmp
     return rtt
 
 def output_report(packets):
@@ -181,7 +217,7 @@ def output_report(packets):
     rtt = get_list_RTT(complete_connections)
     print(rtt)
     print(f'Minimum RTT value: {round6(min(rtt))} seconds')
-    print(f'Mean RTT value: TODO seconds')
+    print(f'Mean RTT value: {round6(sum(rtt)/len(rtt))} seconds')
     print(f'Maximum RTT value: {round6(max(rtt))} seconds')
     print()
     print(f'Minimum number of packets including both send/received: {get_min_packets(complete_connections)}')
