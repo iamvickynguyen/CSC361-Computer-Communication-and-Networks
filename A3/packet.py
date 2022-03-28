@@ -160,15 +160,16 @@ def get_packet(data, pkt_number: int, pkt_header: Packet_Header) -> Packet:
     packet.set_packet_number(pkt_number)
     packet.set_timestamp(pkt_header.ts_sec, pkt_header.ts_usec, 0)
 
-    ip_header = parse_ip_header(data[14:14 + 20])
+    ip_header = parse_ip_header(data[14:14+20])
     packet.set_ip_header(ip_header)
 
+    offset = 14 + ip_header.ihl
     if ip_header.protocol == 1:
-        icmp_header = parse_icmp_header(data[20:28])
+        icmp_header = parse_icmp_header(data[offset:offset+8])
         packet.set_icmp_header(icmp_header)
         return packet
     elif ip_header.protocol == 17:
-        udp_header = parse_udp_header(data[20:28])
+        udp_header = parse_udp_header(data[offset:offset+8])
         packet.set_udp_header(udp_header)
         return packet
     return None

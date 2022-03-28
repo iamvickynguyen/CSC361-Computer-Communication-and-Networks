@@ -14,8 +14,5 @@ def main():
             packet = get_packet(pkt_data, len(packets) + 1, pkt_header)
             if packet: packets.append(packet)
 
-        for p in packets:
-            print(p)
-
 if __name__ == "__main__":
     main()
