@@ -166,10 +166,14 @@ def get_packet(data, pkt_number: int, pkt_header: Packet_Header) -> Packet:
     offset = 14 + ip_header.ihl
     if ip_header.protocol == 1:
         icmp_header = parse_icmp_header(data[offset:offset+8])
+        if icmp_header.type not in [0, 3, 8, 11]:
+            return None 
         packet.set_icmp_header(icmp_header)
         return packet
     elif ip_header.protocol == 17:
         udp_header = parse_udp_header(data[offset:offset+8])
+        if not 33434 <= udp_header.dst_port <= 33529:
+            return None
         packet.set_udp_header(udp_header)
         return packet
     return None
