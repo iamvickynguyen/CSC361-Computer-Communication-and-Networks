@@ -104,8 +104,8 @@ class ICMP_Header:
 class Packet:
     def __init__(self):
         self.ip_header = IP_Header()
-        self.udp_header = UDP_Header()
-        self.icmp_header = ICMP_Header()
+        self.udp_header = None
+        self.icmp_header = None
         self.timestamp = 0
         self.packet_no = 0
 
