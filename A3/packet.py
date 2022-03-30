@@ -49,7 +49,7 @@ class IP_Header:
     def set_fragment_offset(self, buffer):
         result = struct.unpack('>H', buffer)[0]
         self.flags = (result & 0b1111111111111111) >> 13
-        self.fragment_offset = (result & 0b1111111111111)
+        self.fragment_offset = (result & 0b1111111111111) * 8
 
     def set_ttl(self, buffer):
         self.ttl = struct.unpack('B', buffer)[0]
@@ -64,6 +64,9 @@ class IP_Header:
     def set_dst_ip(self, buffer):
         dst_addr = struct.unpack('BBBB',buffer)
         self.dst_ip = str(dst_addr[0])+'.'+str(dst_addr[1])+'.'+str(dst_addr[2])+'.'+str(dst_addr[3])
+
+    def __str__(self):
+        return str(self.__class__) + str(self.__dict__)
         
 
 class UDP_Header:
@@ -85,6 +88,9 @@ class UDP_Header:
     def set_checksum(self, buffer):
         self.checksum = struct.unpack('>H', buffer)[0]
 
+    def __str__(self):
+        return str(self.__class__) + str(self.__dict__)
+
 
 class ICMP_Header:
     def __init__(self):
@@ -99,6 +105,9 @@ class ICMP_Header:
         self.code = struct.unpack('B', buffer)[0]
 
     #TODO
+
+    def __str__(self):
+        return str(self.__class__) + str(self.__dict__)
 
 
 class Packet:
@@ -125,7 +134,7 @@ class Packet:
         self.packet_no = packet_no
 
     def __str__(self):
-        return str(self.__class__) + ": <IP>" + str(self.ip_header.__dict__) + ": <UDP>" + str(self.udp_header.__dict__) + ": <ICMP>" + str(self.icmp_header.__dict__)
+        return str(self.__class__) + "no:" + str(self.packet_no) + ", IP:" + str(self.ip_header) + ", UDP: " + str(self.udp_header) + ", ICMP: " + str(self.icmp_header)
 
 
 def parse_ip_header(data) -> IP_Header:
@@ -172,8 +181,6 @@ def get_packet(data, pkt_number: int, pkt_header: Packet_Header) -> Packet:
         return packet
     elif ip_header.protocol == 17:
         udp_header = parse_udp_header(data[offset:offset+8])
-        if not 33434 <= udp_header.dst_port <= 33529:
-            return None
         packet.set_udp_header(udp_header)
         return packet
     return None
