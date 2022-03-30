@@ -96,7 +96,9 @@ class ICMP_Header:
     def __init__(self):
         self.type = None #int
         self.code = None #int
-        # TODO
+        self.sequence = None #int
+        self.src_port = None #int
+        self.dst_port = None #int
 
     def set_type(self, buffer):
         self.type = struct.unpack('B', buffer)[0]
@@ -104,8 +106,15 @@ class ICMP_Header:
     def set_code(self, buffer):
         self.code = struct.unpack('B', buffer)[0]
 
-    #TODO
+    def set_sequence(self, buffer):
+        self.sequence = struct.unpack('>H', buffer)[0]
 
+    def set_src_port(self, buffer):
+        self.src_port = struct.unpack('>H', buffer)[0]
+
+    def set_dst_port(self, buffer):
+        self.dst_port = struct.unpack('>H', buffer)[0]
+    
     def __str__(self):
         return str(self.__class__) + str(self.__dict__)
 
@@ -158,10 +167,17 @@ def parse_udp_header(data) -> UDP_Header:
     return udp_header
 
 # TODO
-def parse_icmp_header(data) -> ICMP_Header:
+def parse_icmp_header(data, ihl=0) -> ICMP_Header:
     icmp_header = ICMP_Header()
     icmp_header.set_type(data[:1])
     icmp_header.set_code(data[1:2])
+
+    if icmp_header.type == 8 or icmp_header.type == 0: #FIXME
+        icmp_header.set_sequence(data[6:8])
+    elif icmp_header.type == 11 or icmp_header.type == 3:
+        offset = 8 + ihl
+        icmp_header.set_src_port(data[offset: offset+2])
+        icmp_header.set_dst_port(data[offset+2: offset+4])
     return icmp_header
 
 def get_packet(data, pkt_number: int, pkt_header: Packet_Header) -> Packet:
@@ -174,7 +190,7 @@ def get_packet(data, pkt_number: int, pkt_header: Packet_Header) -> Packet:
 
     offset = 14 + ip_header.ihl
     if ip_header.protocol == 1:
-        icmp_header = parse_icmp_header(data[offset:offset+8])
+        icmp_header = parse_icmp_header(data[offset:offset+8], ip_header.ihl)
         if icmp_header.type not in [0, 3, 8, 11]:
             return None 
         packet.set_icmp_header(icmp_header)
