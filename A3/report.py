@@ -16,7 +16,7 @@ def print_rtt_calculation(routers, src_ip):
     for ip, times in routers.items():
         avg = round(sum(times)/len(times), 6)
         sd = round((sum(map(lambda t: (t-avg)**2, times))/len(times))**(1/2), 6)
-        print(f"The avg RTT between {src_ip} and {ip} is: {avg} ms, the s.d. is: {sd} ms")
+        print(f"The average RTT between {src_ip} and {ip} is: {avg} ms, the s.d. is: {sd} ms")
 
 def get_routers(src_packets, dst_packets, is_linux, src_ip):
     routers = OrderedDict()
@@ -38,10 +38,10 @@ def get_routers(src_packets, dst_packets, is_linux, src_ip):
 
 def output_report(src_ip, dst_ip, src_packets, dst_packets, fragments, is_linux, has_udp):
     print(f"The IP address of the source node: {src_ip}")
-    print(f"The IP address of ultimate destination node: {dst_ip}")
+    print(f"The IP address of the ultimate destination node: {dst_ip}")
 
     routers = get_routers(src_packets, dst_packets, is_linux, src_ip)
-    print("The IP addresses of the intermediate destination nodes:")
+    print("The IP addresses of the intermediate nodes:")
     print_intermediate_routers(routers, dst_ip)
     print()
 
