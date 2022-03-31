@@ -8,6 +8,7 @@ def main():
     src, dst = [], []
     fragments = defaultdict(lambda: (0, 0))
     src_ip, dst_ip = None, None
+    is_linux = True
     with open(sys.argv[1], 'rb') as f:
         glob_header = Global_Header(f.read(24))
 
@@ -27,9 +28,12 @@ def main():
                         dst_ip = packet.ip_header.dst_ip
                     if 33434 <= packet.udp_header.dst_port <= 33529:
                         src.append(packet)
-                else: dst.append(packet)
+                else:
+                    dst.append(packet)
+                    if packet.icmp_header.type == 8:
+                        is_linux = False
 
-    output_report(src_ip, dst_ip, src, dst, fragments)
+    output_report(src_ip, dst_ip, src, dst, fragments, is_linux)
 
 if __name__ == "__main__":
     main()
