@@ -171,11 +171,14 @@ def parse_icmp_header(data, ihl, incl_len) -> ICMP_Header:
     icmp_header.set_type(data[:1])
     icmp_header.set_code(data[1:2])
 
+    # Windows
     if icmp_header.type == 8 or icmp_header.type == 0:
         icmp_header.set_sequence(data[6:8])
+
+    # Linux
     offset = 8 + ihl
     if offset + 4 <= incl_len:
-        if icmp_header.type != 8 or icmp_header.type != 0:
+        if icmp_header.type != 8 and icmp_header.type != 0:
             icmp_header.set_sequence(data[offset+6: offset+8])
         icmp_header.set_src_port(data[offset: offset+2])
         icmp_header.set_dst_port(data[offset+2: offset+4])

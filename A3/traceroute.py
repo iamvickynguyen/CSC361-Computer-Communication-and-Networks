@@ -33,6 +33,13 @@ def main():
                     if packet.icmp_header.type == 8:
                         is_linux = False
 
+    # print(is_linux)
+    # print("SRC--------------")
+    # for p in src:
+    #     print(p)
+    # print("DEST------------")
+    # for p in dst:
+    #     print(p)
     output_report(src_ip, dst_ip, src, dst, fragments, is_linux)
 
 if __name__ == "__main__":
