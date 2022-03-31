@@ -11,6 +11,7 @@ def print_fragment_info(src_packets, fragments):
         if id in fragments and fragments[id][0] > 1:
             print(f"The number of fragments created from the original datagram with id {id} is: {fragments[id][0]}")
             print(f"The offset of the last fragment is: {fragments[id][1]}")
+            print()
 
 def print_rtt_calculation(routers, src_ip):
     for ip, times in routers.items():
@@ -51,7 +52,6 @@ def output_report(src_ip, dst_ip, src_packets, dst_packets, fragments, is_linux,
     print()
 
     print_fragment_info(src_packets, fragments)
-    print()
 
     print_rtt_calculation(routers, src_ip)
     

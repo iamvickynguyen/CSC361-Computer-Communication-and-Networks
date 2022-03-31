@@ -171,6 +171,9 @@ def parse_icmp_header(data, ihl, incl_len) -> ICMP_Header:
     icmp_header.set_type(data[:1])
     icmp_header.set_code(data[1:2])
 
+    if icmp_header.type not in [0, 3, 8, 11]:
+        return icmp_header
+
     # Windows
     if icmp_header.type == 8 or icmp_header.type == 0:
         icmp_header.set_sequence(data[6:8])
