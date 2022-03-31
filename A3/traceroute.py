@@ -9,6 +9,7 @@ def main():
     fragments = defaultdict(lambda: (0, 0))
     src_ip, dst_ip = None, None
     is_linux = True
+    has_udp = False
     with open(sys.argv[1], 'rb') as f:
         glob_header = Global_Header(f.read(24))
 
@@ -22,6 +23,7 @@ def main():
             id += 1
             if packet:
                 if packet.udp_header:
+                    has_udp = True
                     (count, offset) = fragments[packet.ip_header.id]
                     fragments[packet.ip_header.id] = (count + 1, packet.ip_header.fragment_offset)
                     if packet.ip_header.ttl == 1:
@@ -42,7 +44,7 @@ def main():
             if packet.ip_header.ttl == 1:
                 src_ip = packet.ip_header.src_ip
                 dst_ip = packet.ip_header.dst_ip
-            if packet.icmp_header.type == 8 or packet.icmp_header.type == 0:
+            if packet.icmp_header.type == 8:
                 src_tmp.append(packet)
                 (count, offset) = fragments[packet.ip_header.id]
                 fragments[packet.ip_header.id] = (count + 1, packet.ip_header.fragment_offset)
@@ -51,7 +53,7 @@ def main():
         src = src_tmp
         dst = dst_tmp
 
-    output_report(src_ip, dst_ip, src, dst, fragments, is_linux)
+    output_report(src_ip, dst_ip, src, dst, fragments, is_linux, has_udp)
 
 if __name__ == "__main__":
     main()
