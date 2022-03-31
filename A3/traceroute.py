@@ -12,6 +12,7 @@ def main():
     with open(sys.argv[1], 'rb') as f:
         glob_header = Global_Header(f.read(24))
 
+        # treat as Linux first
         while True:
             next_bytes = f.read(16)
             if not next_bytes: break
@@ -33,13 +34,23 @@ def main():
                     if packet.icmp_header.type == 8:
                         is_linux = False
 
-    # print(is_linux)
-    # print("SRC--------------")
-    # for p in src:
-    #     print(p)
-    # print("DEST------------")
-    # for p in dst:
-    #     print(p)
+    # change to Windows
+    if not is_linux:
+        src_tmp, dst_tmp = [], []
+        fragments.clear()
+        for packet in dst:
+            if packet.ip_header.ttl == 1:
+                src_ip = packet.ip_header.src_ip
+                dst_ip = packet.ip_header.dst_ip
+            if packet.icmp_header.type == 8 or packet.icmp_header.type == 0:
+                src_tmp.append(packet)
+                (count, offset) = fragments[packet.ip_header.id]
+                fragments[packet.ip_header.id] = (count + 1, packet.ip_header.fragment_offset)
+            else:
+                dst_tmp.append(packet)
+        src = src_tmp
+        dst = dst_tmp
+
     output_report(src_ip, dst_ip, src, dst, fragments, is_linux)
 
 if __name__ == "__main__":

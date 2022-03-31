@@ -28,10 +28,8 @@ def get_routers(src_packets, dst_packets, is_linux, src_ip):
                     l.append(b.timestamp - a.timestamp)
                     routers[b.ip_header.src_ip] = l
     else:
-        src = list(filter(lambda p: p.icmp_header.type == 8, dst_packets))
-        dst = list(filter(lambda p: p.icmp_header.type == 11 or p.icmp_header.type == 0, dst_packets))
-        for a in src:
-            for b in dst:
+        for a in src_packets:
+            for b in dst_packets:
                 if a.icmp_header.sequence == b.icmp_header.sequence:
                     l = routers.get(b.ip_header.src_ip, [])
                     l.append(b.timestamp - a.timestamp)
@@ -48,8 +46,8 @@ def output_report(src_ip, dst_ip, src_packets, dst_packets, fragments, is_linux)
     print()
 
     print("The values in protocol field of IP headers:")
-    if dst_packets: print("    1: ICMP")
-    if src_packets: print("    17: UDP")
+    if (is_linux and dst_packets) or (not is_linux and src_packets): print("    1: ICMP")
+    if is_linux and src_packets: print("    17: UDP")
     print()
 
     print_fragment_info(src_packets, fragments)
