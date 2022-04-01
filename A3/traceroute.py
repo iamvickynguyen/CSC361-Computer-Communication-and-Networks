@@ -53,6 +53,9 @@ def main():
         src = src_tmp
         dst = dst_tmp
 
+    src = sorted(src, key=lambda p: p.ip_header.ttl)
+    dst = sorted(dst, key=lambda p: p.ip_header.ttl)
+    
     output_report(src_ip, dst_ip, src, dst, fragments, is_linux, has_udp)
 
 if __name__ == "__main__":
