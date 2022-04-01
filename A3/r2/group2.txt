@@ -1,0 +1,135 @@
+--------------------------------------------------------------------------------
+./tests/group2/group2-trace1.pcap
+--------------------------------------------------------------------------------
+The IP address of the source node: 192.168.0.16
+The IP address of the ultimate destination node: 8.8.8.8
+The IP addresses of the intermediate nodes:
+     router 1: 192.168.0.1
+     router 2: 24.108.0.1
+     router 3: 64.59.161.197
+     router 4: 66.163.72.26
+     router 5: 66.163.68.18
+     router 6: 72.14.221.102
+     router 7: 108.170.245.113
+     router 8: 209.85.249.249
+
+The values in protocol field of IP headers:
+    1: ICMP
+
+The average RTT between 192.168.0.16 and 192.168.0.1 is: 3.329667 ms, the s.d. is: 1.643727 ms
+The average RTT between 192.168.0.16 and 24.108.0.1 is: 15.811667 ms, the s.d. is: 2.282815 ms
+The average RTT between 192.168.0.16 and 64.59.161.197 is: 18.869333 ms, the s.d. is: 2.811982 ms
+The average RTT between 192.168.0.16 and 66.163.72.26 is: 22.843 ms, the s.d. is: 1.616413 ms
+The average RTT between 192.168.0.16 and 66.163.68.18 is: 26.502 ms, the s.d. is: 3.988886 ms
+The average RTT between 192.168.0.16 and 72.14.221.102 is: 24.263667 ms, the s.d. is: 2.485784 ms
+The average RTT between 192.168.0.16 and 108.170.245.113 is: 18.408 ms, the s.d. is: 0.498201 ms
+The average RTT between 192.168.0.16 and 209.85.249.249 is: 22.970667 ms, the s.d. is: 4.915272 ms
+The average RTT between 192.168.0.16 and 8.8.8.8 is: 18.099667 ms, the s.d. is: 0.762928 ms
+--------------------------------------------------------------------------------
+./tests/group2/group2-trace2.pcap
+--------------------------------------------------------------------------------
+The IP address of the source node: 192.168.0.16
+The IP address of the ultimate destination node: 8.8.8.8
+The IP addresses of the intermediate nodes:
+     router 1: 192.168.0.1
+     router 2: 24.108.0.1
+     router 3: 64.59.161.197
+     router 4: 66.163.72.26
+     router 5: 66.163.68.18
+     router 6: 72.14.221.102
+     router 7: 108.170.245.113
+     router 8: 209.85.249.249
+
+The values in protocol field of IP headers:
+    1: ICMP
+
+The average RTT between 192.168.0.16 and 192.168.0.1 is: 2.710667 ms, the s.d. is: 0.961286 ms
+The average RTT between 192.168.0.16 and 24.108.0.1 is: 17.118333 ms, the s.d. is: 4.664059 ms
+The average RTT between 192.168.0.16 and 64.59.161.197 is: 20.096667 ms, the s.d. is: 3.97057 ms
+The average RTT between 192.168.0.16 and 66.163.72.26 is: 19.42 ms, the s.d. is: 1.419443 ms
+The average RTT between 192.168.0.16 and 66.163.68.18 is: 21.555333 ms, the s.d. is: 3.381251 ms
+The average RTT between 192.168.0.16 and 72.14.221.102 is: 19.982333 ms, the s.d. is: 1.657328 ms
+The average RTT between 192.168.0.16 and 108.170.245.113 is: 51.658 ms, the s.d. is: 19.421109 ms
+The average RTT between 192.168.0.16 and 209.85.249.249 is: -224.262333 ms, the s.d. is: 478.960913 ms
+The average RTT between 192.168.0.16 and 8.8.8.8 is: 21.911 ms, the s.d. is: 5.114036 ms
+--------------------------------------------------------------------------------
+./tests/group2/group2-trace3.pcap
+--------------------------------------------------------------------------------
+The IP address of the source node: 192.168.0.16
+The IP address of the ultimate destination node: 8.8.8.8
+The IP addresses of the intermediate nodes:
+     router 1: 192.168.0.1
+     router 2: 24.108.0.1
+     router 3: 64.59.161.197
+     router 4: 66.163.72.26
+     router 5: 66.163.68.18
+     router 6: 72.14.221.102
+     router 7: 108.170.245.113
+     router 8: 209.85.249.249
+
+The values in protocol field of IP headers:
+    1: ICMP
+
+The average RTT between 192.168.0.16 and 192.168.0.1 is: 7.854 ms, the s.d. is: 4.936731 ms
+The average RTT between 192.168.0.16 and 24.108.0.1 is: 11.835333 ms, the s.d. is: 1.275612 ms
+The average RTT between 192.168.0.16 and 64.59.161.197 is: 22.579333 ms, the s.d. is: 3.316973 ms
+The average RTT between 192.168.0.16 and 66.163.72.26 is: 19.460333 ms, the s.d. is: 2.689211 ms
+The average RTT between 192.168.0.16 and 66.163.68.18 is: 20.321333 ms, the s.d. is: 1.551795 ms
+The average RTT between 192.168.0.16 and 72.14.221.102 is: 21.849667 ms, the s.d. is: 2.091286 ms
+The average RTT between 192.168.0.16 and 108.170.245.113 is: 22.763333 ms, the s.d. is: 3.78618 ms
+The average RTT between 192.168.0.16 and 209.85.249.249 is: 20.592 ms, the s.d. is: 1.939469 ms
+The average RTT between 192.168.0.16 and 8.8.8.8 is: 23.14 ms, the s.d. is: 4.411134 ms
+--------------------------------------------------------------------------------
+./tests/group2/group2-trace4.pcap
+--------------------------------------------------------------------------------
+The IP address of the source node: 192.168.0.16
+The IP address of the ultimate destination node: 8.8.8.8
+The IP addresses of the intermediate nodes:
+     router 1: 192.168.0.1
+     router 2: 24.108.0.1
+     router 3: 64.59.161.197
+     router 4: 66.163.72.26
+     router 5: 66.163.68.18
+     router 6: 72.14.221.102
+     router 7: 108.170.245.113
+     router 8: 209.85.249.249
+
+The values in protocol field of IP headers:
+    1: ICMP
+
+The average RTT between 192.168.0.16 and 192.168.0.1 is: 3.415333 ms, the s.d. is: 2.383547 ms
+The average RTT between 192.168.0.16 and 24.108.0.1 is: 13.245 ms, the s.d. is: 2.118899 ms
+The average RTT between 192.168.0.16 and 64.59.161.197 is: 21.672333 ms, the s.d. is: 1.807512 ms
+The average RTT between 192.168.0.16 and 66.163.72.26 is: 19.754667 ms, the s.d. is: 5.003532 ms
+The average RTT between 192.168.0.16 and 66.163.68.18 is: 35.771333 ms, the s.d. is: 8.19373 ms
+The average RTT between 192.168.0.16 and 72.14.221.102 is: 22.674667 ms, the s.d. is: 3.854461 ms
+The average RTT between 192.168.0.16 and 108.170.245.113 is: 18.337333 ms, the s.d. is: 1.040308 ms
+The average RTT between 192.168.0.16 and 209.85.249.249 is: 24.574333 ms, the s.d. is: 4.18498 ms
+The average RTT between 192.168.0.16 and 8.8.8.8 is: 19.942667 ms, the s.d. is: 3.158243 ms
+--------------------------------------------------------------------------------
+./tests/group2/group2-trace5.pcap
+--------------------------------------------------------------------------------
+The IP address of the source node: 192.168.0.16
+The IP address of the ultimate destination node: 8.8.8.8
+The IP addresses of the intermediate nodes:
+     router 1: 192.168.0.1
+     router 2: 24.108.0.1
+     router 3: 64.59.161.197
+     router 4: 66.163.72.26
+     router 5: 66.163.68.18
+     router 6: 72.14.221.102
+     router 7: 108.170.245.113
+     router 8: 209.85.249.249
+
+The values in protocol field of IP headers:
+    1: ICMP
+
+The average RTT between 192.168.0.16 and 192.168.0.1 is: 1.745667 ms, the s.d. is: 0.064381 ms
+The average RTT between 192.168.0.16 and 24.108.0.1 is: 16.153667 ms, the s.d. is: 3.359643 ms
+The average RTT between 192.168.0.16 and 64.59.161.197 is: 21.601667 ms, the s.d. is: 5.300335 ms
+The average RTT between 192.168.0.16 and 66.163.72.26 is: 18.558333 ms, the s.d. is: 1.154074 ms
+The average RTT between 192.168.0.16 and 66.163.68.18 is: 20.717 ms, the s.d. is: 4.157013 ms
+The average RTT between 192.168.0.16 and 72.14.221.102 is: 43.472 ms, the s.d. is: 34.584404 ms
+The average RTT between 192.168.0.16 and 108.170.245.113 is: 26.921333 ms, the s.d. is: 8.141096 ms
+The average RTT between 192.168.0.16 and 209.85.249.249 is: 25.623333 ms, the s.d. is: 4.122916 ms
+The average RTT between 192.168.0.16 and 8.8.8.8 is: 21.442 ms, the s.d. is: 3.226 ms

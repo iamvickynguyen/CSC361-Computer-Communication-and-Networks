@@ -1,6 +1,6 @@
 #!/bin/bash
 FILENAME=traceroute.py
-DIRECTORY=./tests/group2
+DIRECTORY=./r2/tests/group2
 
 for file in $DIRECTORY/*;
 do
